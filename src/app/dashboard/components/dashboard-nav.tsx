@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface Kid {
   id: string;
@@ -21,6 +21,7 @@ export default function DashboardNav({
   familyId: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -56,6 +57,16 @@ export default function DashboardNav({
               + Add Kid
             </Link>
           </div>
+          <Link
+            href="/dashboard/camps"
+            className={`text-sm font-semibold transition-colors ${
+              pathname.startsWith("/dashboard/camps")
+                ? "text-[var(--color-text)]"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            }`}
+          >
+            Camps
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">

@@ -22,7 +22,7 @@ Every cell in the `SummerOverview` grid becomes clickable. A popover anchored to
 **Camp cell popover:**
 - Shows camp name, dates, category, cost
 - "Edit" — navigates to `/dashboard/camps/[id]/edit`
-- "Remove Assignment" — confirms, then deletes the assignment (not the camp itself)
+- "Remove Assignment" — confirms via native `window.confirm()`, then deletes the assignment and its orphaned `camp_session` row (since we maintain a 1:1 camp:session model, a session with no assignment is unreachable). The camp record itself is preserved and remains visible on the camp list page.
 
 **Vacation/override cell popover:**
 - Shows label and type
@@ -38,10 +38,12 @@ Popover actions call Supabase directly from the client component. After any muta
 
 ### Pre-fill logic for "Add Camp"
 
-The `camps/new` page reads `kid` and `week` query params on mount. If present:
+The `camps/new` page reads `kid` and `week` query params on mount. If present and valid (kid ID exists in the user's family, week is a valid Monday within summer range), they pre-fill the form:
 - Pre-selects the kid in the kid picker
 - Sets start date to the Monday of that week
 - Sets end date to the Friday of that week
+
+Invalid or malformed params are silently ignored (fields fall back to empty/default). Validate the `kid` param against the already-fetched kids list, not a separate query.
 
 ## Feature 2: Camp & Assignment Management
 
@@ -56,15 +58,15 @@ Lists all camps created by the user. Each camp card shows:
 
 Actions per camp:
 - "Edit" — navigates to `/dashboard/camps/[id]/edit`
-- "Delete" — confirm dialog, then cascading delete: camp + sessions + assignments
+- "Delete" — native `window.confirm()` dialog, then cascading delete: camp + sessions + assignments
 
 ### Camp edit page: `/dashboard/camps/[id]/edit`
 
-Reuses the same form layout as `camps/new`, pre-populated with existing data. The kid picker allows changing or adding kid assignments for the session. Save updates camp, session, and assignment records.
+Reuses the same form layout as `camps/new`, pre-populated with existing data. The kid picker allows changing or adding kid assignments for the session. Save updates the existing camp and session rows in place (no delete/recreate — the session row must be preserved to maintain the `camp_session_id` foreign key on assignments). Assignment rows are upserted as needed.
 
 ### Nav update
 
-Add "Camps" link to `DashboardNav` between the kid pills area and the user name/sign-out area.
+Add "Camps" link to `DashboardNav` in the left flex group, after the kid pills. Styled as `text-sm font-semibold` with `text-[var(--color-text-muted)]` default state and `text-[var(--color-text)]` when active. Use `usePathname()` from `next/navigation` to detect active state (path starts with `/dashboard/camps`). `DashboardNav` is already a client component so no directive change is needed.
 
 ### Data flow
 
@@ -85,11 +87,15 @@ Save creates one `coverage_override` row per selected kid.
 ### Visual distinction
 
 - Vacation weeks: amber background (existing behavior)
-- "No Coverage Needed" weeks: solid light gray background (`#E8E5E0` at 50% opacity) — distinguishes "we have plans" from "we chose not to cover this"
+- "No Coverage Needed" weeks: solid `var(--color-bg)` background (`#FAFAF8`) with a subtle border `var(--color-border)` — distinguishes "we chose not to cover this" from both vacation (amber) and gap (red dashed). In dark mode uses `#141413`.
 
 ### Override management
 
 Handled entirely through the calendar popover (Feature 1). No separate overrides list page — clicking a vacation or override cell on the calendar shows the label and a "Remove" action.
+
+### Modal behavior
+
+The "Mark Time Off" modal is a centered overlay with `border-radius: var(--radius-lg)` (16px per DESIGN.md). Dismisses on click-outside, Escape key, or Cancel button. Enter transition: 250ms ease-out per DESIGN.md motion spec.
 
 ## Files to create or modify
 
@@ -104,7 +110,8 @@ Handled entirely through the calendar popover (Feature 1). No separate overrides
 - `src/app/dashboard/components/dashboard-nav.tsx` — add "Camps" nav link
 - `src/app/dashboard/page.tsx` — add "Mark Time Off" button
 - `src/app/dashboard/camps/new/page.tsx` — read query params for pre-fill
-- `src/lib/coverage.ts` — add `no_coverage_needed` type handling + gray color
+- `src/lib/coverage.ts` — narrow `CoverageOverride.type` from `string` to `"vacation" | "no_coverage_needed"`. Expand `WeekCoverage.type` union to `"camp" | "vacation" | "no_coverage_needed" | "gap"`. Update `getKidWeekCoverage` to branch on `override.type` instead of always returning `"vacation"` for all overrides. Update `getCoveragePercentage` to count `no_coverage_needed` as covered.
+- `src/app/dashboard/components/coverage-bar.tsx` — add rendering case for `no_coverage_needed` segments: solid `var(--color-bg)` background with `var(--color-border)` border (matching calendar cell treatment)
 
 ## Out of scope
 

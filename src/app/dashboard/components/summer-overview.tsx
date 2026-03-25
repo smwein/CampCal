@@ -65,7 +65,9 @@ export default function SummerOverview({
                   className={`h-9 rounded flex items-center justify-center text-[10px] font-semibold transition-colors ${
                     week.type === "gap"
                       ? "border border-dashed border-[var(--color-gap)]"
-                      : "text-white"
+                      : week.type === "no_coverage_needed"
+                        ? "border border-[var(--color-border)] text-[var(--color-text-muted)]"
+                        : "text-white"
                   }`}
                   style={{
                     backgroundColor:
@@ -73,7 +75,9 @@ export default function SummerOverview({
                         ? kid.color
                         : week.type === "vacation"
                           ? "var(--color-vacation)"
-                          : undefined,
+                          : week.type === "no_coverage_needed"
+                            ? "var(--color-bg)"
+                            : undefined,
                     backgroundImage:
                       week.type === "gap"
                         ? "repeating-linear-gradient(45deg, transparent, transparent 3px, #FEE2E2 3px, #FEE2E2 6px)"
@@ -84,14 +88,18 @@ export default function SummerOverview({
                       ? week.campName ?? ""
                       : week.type === "vacation"
                         ? week.overrideLabel ?? "Vacation"
-                        : "No coverage"
+                        : week.type === "no_coverage_needed"
+                          ? week.overrideLabel ?? "No coverage needed"
+                          : "No coverage"
                   }
                 >
                   {week.type === "camp"
                     ? (week.campName ?? "").split(" ")[0]
                     : week.type === "vacation"
                       ? (week.overrideLabel ?? "Vacation").split(" ")[0]
-                      : ""}
+                      : week.type === "no_coverage_needed"
+                        ? (week.overrideLabel ?? "OK").split(" ")[0]
+                        : ""}
                 </div>
               ))}
             </div>

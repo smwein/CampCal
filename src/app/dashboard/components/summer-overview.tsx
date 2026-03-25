@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import {
   Kid,
   Assignment,
   CoverageOverride,
+  WeekCoverage,
   getKidWeekCoverage,
   getSummerWeeks,
 } from "@/lib/coverage";
 import { format } from "date-fns";
+import CellPopover from "./cell-popover";
 
 export default function SummerOverview({
   kids,
@@ -19,6 +22,12 @@ export default function SummerOverview({
   overrides: CoverageOverride[];
 }) {
   const weeks = getSummerWeeks();
+  const [popover, setPopover] = useState<{
+    week: WeekCoverage;
+    kidId: string;
+    kidName: string;
+    rect: DOMRect;
+  } | null>(null);
 
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-6 overflow-x-auto">
@@ -62,7 +71,11 @@ export default function SummerOverview({
               {coverage.map((week, i) => (
                 <div
                   key={i}
-                  className={`h-9 rounded flex items-center justify-center text-[10px] font-semibold transition-colors ${
+                  onClick={(e) => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    setPopover({ week, kidId: kid.id, kidName: kid.name, rect });
+                  }}
+                  className={`h-9 rounded flex items-center justify-center text-[10px] font-semibold transition-colors cursor-pointer ${
                     week.type === "gap"
                       ? "border border-dashed border-[var(--color-gap)]"
                       : week.type === "no_coverage_needed"
@@ -106,6 +119,16 @@ export default function SummerOverview({
           );
         })}
       </div>
+
+      {popover && (
+        <CellPopover
+          week={popover.week}
+          kidId={popover.kidId}
+          kidName={popover.kidName}
+          anchorRect={popover.rect}
+          onClose={() => setPopover(null)}
+        />
+      )}
 
       {kids.length === 0 && (
         <p className="text-sm text-[var(--color-text-muted)] text-center py-8">

@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+type AuthMode = "magic-link" | "password";
 
 export default function LoginPage() {
+  const [mode, setMode] = useState<AuthMode>("password");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -27,6 +34,25 @@ export default function LoginPage() {
       setError(error.message);
     } else {
       setSent(true);
+    }
+  }
+
+  async function handlePasswordLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/dashboard");
     }
   }
 
@@ -58,11 +84,39 @@ export default function LoginPage() {
         <h1 className="font-[var(--font-display)] font-extrabold text-3xl mb-2 text-center">
           Sign in to CampCalendar
         </h1>
-        <p className="text-[var(--color-text-muted)] text-center mb-8">
-          Enter your email and we&apos;ll send you a magic link.
+        <p className="text-[var(--color-text-muted)] text-center mb-6">
+          {mode === "password"
+            ? "Enter your email and password."
+            : "Enter your email and we\u2019ll send you a magic link."}
         </p>
 
-        <form onSubmit={handleLogin}>
+        {/* Mode tabs */}
+        <div className="flex gap-1 mb-6 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-1">
+          <button
+            type="button"
+            onClick={() => { setMode("password"); setError(""); }}
+            className={`flex-1 text-sm font-semibold py-2 rounded-[4px] transition-colors ${
+              mode === "password"
+                ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-sm"
+                : "text-[var(--color-text-muted)]"
+            }`}
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            onClick={() => { setMode("magic-link"); setError(""); }}
+            className={`flex-1 text-sm font-semibold py-2 rounded-[4px] transition-colors ${
+              mode === "magic-link"
+                ? "bg-[var(--color-surface)] text-[var(--color-text)] shadow-sm"
+                : "text-[var(--color-text-muted)]"
+            }`}
+          >
+            Magic Link
+          </button>
+        </div>
+
+        <form onSubmit={mode === "password" ? handlePasswordLogin : handleMagicLink}>
           <label className="block text-sm font-semibold mb-1">Email</label>
           <input
             type="email"
@@ -73,6 +127,21 @@ export default function LoginPage() {
             className="w-full px-4 py-2.5 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/10 outline-none transition-colors mb-4"
           />
 
+          {mode === "password" && (
+            <>
+              <label className="block text-sm font-semibold mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your password"
+                required
+                minLength={6}
+                className="w-full px-4 py-2.5 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/10 outline-none transition-colors mb-4"
+              />
+            </>
+          )}
+
           {error && (
             <p className="text-sm text-[var(--color-gap)] mb-4">{error}</p>
           )}
@@ -82,9 +151,20 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-50 text-white font-semibold py-2.5 rounded-[var(--radius-sm)] transition-colors duration-150"
           >
-            {loading ? "Sending..." : "Send Magic Link"}
+            {loading
+              ? mode === "password" ? "Signing in..." : "Sending..."
+              : mode === "password" ? "Sign In" : "Send Magic Link"}
           </button>
         </form>
+
+        {mode === "password" && (
+          <p className="text-sm text-[var(--color-text-muted)] text-center mt-4">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-[var(--color-accent)] hover:underline font-semibold">
+              Create one
+            </Link>
+          </p>
+        )}
 
         <p className="text-xs text-[var(--color-text-muted)] text-center mt-6">
           By signing in, you confirm you are 18 years or older and agree to our{" "}

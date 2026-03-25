@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import SummerOverview from "./components/summer-overview";
 import CoverageBar from "./components/coverage-bar";
+import TimeOffButton from "./components/time-off-button";
 import Link from "next/link";
 import type { Assignment } from "@/lib/coverage";
 
@@ -98,6 +99,7 @@ export default async function DashboardPage() {
           Summer 2026
         </h2>
         <div className="flex gap-2">
+          <TimeOffButton kids={kids} />
           <Link
             href="/dashboard/camps/new"
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-semibold px-4 py-2 rounded-[var(--radius-sm)] transition-colors"

@@ -40,36 +40,12 @@ export default function SignupPage() {
       return;
     }
 
-    // Create profile/family for the new user
-    if (data.user) {
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", data.user.id)
-        .single();
-
-      if (!existingProfile) {
-        const { data: family } = await supabase
-          .from("families")
-          .insert({})
-          .select("id")
-          .single();
-
-        if (family) {
-          await supabase.from("profiles").insert({
-            id: data.user.id,
-            family_id: family.id,
-            name: name.trim() || "Parent",
-          });
-
-          await supabase.from("family_members").insert({
-            family_id: family.id,
-            user_id: data.user.id,
-            role: "owner",
-          });
-        }
-      }
-    }
+    // Create profile/family via server-side API (RLS blocks client-side inserts)
+    await fetch("/api/auth/setup-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim() || "Parent" }),
+    });
 
     setLoading(false);
     router.push("/dashboard");

@@ -52,7 +52,10 @@ export default function CoverageBar({
                       ? kid.color
                       : week.type === "vacation"
                         ? "var(--color-vacation)"
-                        : undefined,
+                        : week.type === "no_coverage_needed"
+                          ? "var(--color-bg)"
+                          : undefined,
+                  border: week.type === "no_coverage_needed" ? "1px solid var(--color-border)" : undefined,
                   backgroundImage:
                     week.type === "gap"
                       ? "repeating-linear-gradient(45deg, transparent, transparent 3px, #FEE2E2 3px, #FEE2E2 6px)"
@@ -63,7 +66,9 @@ export default function CoverageBar({
                     ? `${week.weekLabel}: ${week.campName}`
                     : week.type === "vacation"
                       ? `${week.weekLabel}: ${week.overrideLabel}`
-                      : `${week.weekLabel}: No coverage`
+                      : week.type === "no_coverage_needed"
+                        ? `${week.weekLabel}: ${week.overrideLabel ?? "No coverage needed"}`
+                        : `${week.weekLabel}: No coverage`
                 }
               />
             ))}

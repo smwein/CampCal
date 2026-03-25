@@ -1,0 +1,21 @@
+name: campcalendar
+region: nyc
+services:
+  - name: web
+    github:
+      repo: smwein/CampCal
+      branch: main
+      deploy_on_push: true
+    build_command: npm run build
+    run_command: npm run start
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    http_port: 3000
+    envs:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: "https://vrjyktyupctltpuipowj.supabase.co"
+        type: GENERAL
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyanlrdHl1cGN0bHRwdWlwb3dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTQ4NzIsImV4cCI6MjA4OTk3MDg3Mn0.wljb5KaS5WidhDWeiIBTcAxRtiTv-Dxsjera-bF-imk"
+        type: GENERAL

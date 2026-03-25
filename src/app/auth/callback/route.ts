@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { ensureProfile } from "@/lib/ensure-profile";
 
 export async function GET(request: Request) {
@@ -24,8 +25,12 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser();
 
       if (user) {
+        const adminClient = createServiceClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
         await ensureProfile(
-          supabase,
+          adminClient,
           user.id,
           user.user_metadata?.name || "Parent"
         );

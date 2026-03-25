@@ -19,3 +19,6 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyanlrdHl1cGN0bHRwdWlwb3dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTQ4NzIsImV4cCI6MjA4OTk3MDg3Mn0.wljb5KaS5WidhDWeiIBTcAxRtiTv-Dxsjera-bF-imk"
         type: GENERAL
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyanlrdHl1cGN0bHRwdWlwb3dqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM5NDg3MiwiZXhwIjoyMDg5OTcwODcyfQ.4IC-5wwten4ao1QxaRF_zH86tx8ywbrBB3cyL3K_toQ"
+        type: SECRET

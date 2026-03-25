@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { format, addDays } from "date-fns";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -62,6 +63,22 @@ export default function NewCampPage() {
         .order("created_at");
       setKids(data ?? []);
       if (data && data.length > 0) setSelectedKidId(data[0].id);
+
+      // Pre-fill from query params
+      const params = new URLSearchParams(window.location.search);
+      const kidParam = params.get("kid");
+      const weekParam = params.get("week");
+
+      if (kidParam && data?.some((k) => k.id === kidParam)) {
+        setSelectedKidId(kidParam);
+      }
+      if (weekParam) {
+        const weekDate = new Date(weekParam);
+        if (!isNaN(weekDate.getTime()) && weekDate.getDay() === 1) {
+          setStartDate(weekParam);
+          setEndDate(format(addDays(weekDate, 4), "yyyy-MM-dd"));
+        }
+      }
     }
     loadKids();
   }, []);

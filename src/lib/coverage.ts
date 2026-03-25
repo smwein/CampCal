@@ -37,7 +37,7 @@ export interface CoverageOverride {
   kid_id: string;
   start_date: string;
   end_date: string;
-  type: string;
+  type: "vacation" | "no_coverage_needed";
   label: string | null;
 }
 
@@ -66,7 +66,7 @@ export interface WeekCoverage {
   weekLabel: string;
   campName: string | null;
   overrideLabel: string | null;
-  type: "camp" | "vacation" | "gap";
+  type: "camp" | "vacation" | "no_coverage_needed" | "gap";
 }
 
 export function getKidWeekCoverage(
@@ -99,7 +99,9 @@ export function getKidWeekCoverage(
         weekLabel: format(weekStart, "MMM d"),
         campName: null,
         overrideLabel: override.label ?? override.type,
-        type: "vacation" as const,
+        type: override.type === "no_coverage_needed"
+          ? ("no_coverage_needed" as const)
+          : ("vacation" as const),
       };
     }
 

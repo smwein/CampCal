@@ -65,6 +65,11 @@ export interface WeekCoverage {
   weekStart: Date;
   weekLabel: string;
   campName: string | null;
+  campId: string | null;
+  campCategory: string | null;
+  assignmentId: string | null;
+  sessionId: string | null;
+  overrideId: string | null;
   overrideLabel: string | null;
   type: "camp" | "vacation" | "no_coverage_needed" | "gap";
 }
@@ -98,6 +103,11 @@ export function getKidWeekCoverage(
         weekStart,
         weekLabel: format(weekStart, "MMM d"),
         campName: null,
+        campId: null,
+        campCategory: null,
+        assignmentId: null,
+        sessionId: null,
+        overrideId: override.id,
         overrideLabel: override.label ?? override.type,
         type: override.type === "no_coverage_needed"
           ? ("no_coverage_needed" as const)
@@ -121,6 +131,11 @@ export function getKidWeekCoverage(
         weekStart,
         weekLabel: format(weekStart, "MMM d"),
         campName: assignment.camp_session.camp.name,
+        campId: assignment.camp_session.camp.id,
+        campCategory: assignment.camp_session.camp.category,
+        assignmentId: assignment.id,
+        sessionId: assignment.camp_session.id,
+        overrideId: null,
         overrideLabel: null,
         type: "camp" as const,
       };
@@ -130,6 +145,11 @@ export function getKidWeekCoverage(
       weekStart,
       weekLabel: format(weekStart, "MMM d"),
       campName: null,
+      campId: null,
+      campCategory: null,
+      assignmentId: null,
+      sessionId: null,
+      overrideId: null,
       overrideLabel: null,
       type: "gap" as const,
     };
